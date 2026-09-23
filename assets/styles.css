@@ -1,0 +1,24 @@
+.spinner-wrap .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.capa-livro {
+    width: 120px;
+    min-width: 120px;
+    height: 180px;
+    object-fit: cover;
+}
+
+.capa-indisponivel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #e9ecef;
+    color: #6c757d;
+}
+
+.card {
+    min-height: 180px;
+}
