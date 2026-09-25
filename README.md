@@ -52,3 +52,6 @@ cd buscalivro
 Depois, abra o arquivo `index.html` no navegador.
 
 
+## 🌐 Deploy
+
+O projeto está disponível em 🔗 [Acessar BuscaLivro](https://busca-livro.netlify.app/)
