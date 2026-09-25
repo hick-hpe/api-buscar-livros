@@ -23,17 +23,19 @@
             </a>
 
             <ul class="navbar-nav flex-row gap-3">
+
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">
+                    <button type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#modal-sobre">
                         Sobre
-                    </a>
+                    </button>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <button type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#modal-contato">
                         Contato
-                    </a>
+                    </button>
                 </li>
+
             </ul>
 
         </div>
@@ -52,23 +54,28 @@
 
             <form id="form-busca" class="mx-auto" style="max-width: 700px;">
 
-                <div class="input-group">
+                <div class="mb-3">
+                    <label for="input-titulo" class="form-label">
+                        Título
+                    </label>
 
-                    <div class="flex-grow-1">
-                        <input id="input-busca" type="text" class="form-control"
-                            placeholder="Pesquise seus livros favoritos..."
-                            aria-label="Pesquise seus livros favoritos...">
-
-                        <div class="invalid-feedback">
-                            Digite pelo menos 3 caracteres.
-                        </div>
-                    </div>
-
-                    <button id="btn-buscar" class="btn btn-primary" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button>
-
+                    <input id="input-titulo" type="text" class="form-control"
+                        placeholder="Digite o título do livro (Min: 3)">
                 </div>
+
+                <div class="mb-3">
+                    <label for="input-autor" class="form-label">
+                        Autor
+                    </label>
+
+                    <input id="input-autor" type="text" class="form-control"
+                        placeholder="Digite o nome do autor (Min: 3)">
+                </div>
+
+                <button id="btn-buscar" class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i>
+                    Pesquisar
+                </button>
 
             </form>
 
@@ -95,6 +102,26 @@
                 </button>
             </div>
 
+            <div class="modal fade" id="modal-livro" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modal-livro-titulo">
+                                Detalhes do livro
+                            </h5>
+
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                            </button>
+                        </div>
+
+                        <div class="modal-body" id="modal-livro-conteudo">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </section>
 
     </main>
@@ -103,9 +130,76 @@
         <div class="fs-3">BuscaLivro</div>
         <div>© Copyright 2020 LuisFrag. All rights reserved.</div>
         <div>
-            <i class="bi bi-github fs-3"></i>
+            <a href="https://github.com/hick-hpe" class="text-white" aria-label="GitHub">
+                <i class="bi bi-github fs-3"></i>
+            </a>
         </div>
     </footer>
+
+    <div class="modal fade" id="modal-sobre" tabindex="-1" aria-labelledby="modal-sobre-titulo" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-sobre-titulo">
+                        Sobre o BuscaLivro
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        O <strong>BuscaLivro</strong> é uma aplicação simples
+                        para pesquisar livros por título e autor.
+                    </p>
+
+                    <p>
+                        As informações dos livros são obtidas através da
+                        <strong>Open Library</strong>.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-contato" tabindex="-1" aria-labelledby="modal-contato-titulo" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-contato-titulo">
+                        Contato
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <p>
+                        Entre em contato através dos canais abaixo:
+                    </p>
+
+                    <a href="https://github.com/hick-hpe/api-buscar-livros/" target="_blank" class="btn btn-dark">
+                        <i class="bi bi-github"></i>
+                        GitHub
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"

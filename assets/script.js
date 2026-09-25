@@ -26,16 +26,18 @@ const URL_API = "https://openlibrary.org/search.json";
  */
 
 const formBusca = document.getElementById("form-busca");
-const inputBusca = document.getElementById("input-busca");
+const inputTitulo = document.getElementById("input-titulo");
+const inputAutor = document.getElementById("input-autor");
 const divSpinner = document.getElementById("spinner-wrap");
 const divResultados = document.getElementById("resultados");
 const divBuscarMais = document.getElementById("buscar-mais");
 
-const LIMITE_POR_EXIBICAO = 12;
+const LIMITE_POR_EXIBICAO = 15;
 
 let paginaAtual = 1;
 let buscaAtual = "";
 
+const livros = new Map();
 
 /*
  * Realiza uma nova pesquisa.
@@ -44,19 +46,22 @@ formBusca.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
-    buscaAtual = inputBusca.value.trim();
+    const titulo = inputTitulo.value.trim();
+    const autor = inputAutor.value.trim();
+
+    if (titulo.length < 3 && autor.length < 3) {
+        return;
+    }
+
+    buscaAtual = {
+        titulo,
+        autor
+    };
 
     // Não faz busca se o campo estiver vazio
     if (!buscaAtual) {
         return;
     }
-
-    if (buscaAtual.length < 3) {
-        inputBusca.classList.add("is-invalid");
-        return;
-    }
-
-    inputBusca.classList.remove("is-invalid");
 
     // Toda nova pesquisa começa na página 1
     paginaAtual = 1;
@@ -69,7 +74,7 @@ formBusca.addEventListener("submit", async (e) => {
 
     try {
 
-        await fazerBuscaSimples(buscaAtual, true);
+        await fazerBuscaLivros(buscaAtual, true);
 
     } finally {
 
@@ -84,26 +89,35 @@ formBusca.addEventListener("submit", async (e) => {
 /*
  * Busca uma página de resultados.
  */
-async function fazerBuscaSimples(query, novaBusca = false) {
+async function fazerBuscaLivros(filtros, novaBusca = false) {
 
     try {
+        const params = new URLSearchParams();
 
-        const url =
-            `${URL_API}?q=${encodeURIComponent(query)}` +
-            `&limit=${LIMITE_POR_EXIBICAO}` +
-            `&page=${paginaAtual}`;
+        if (filtros.titulo) {
+            params.set("title", filtros.titulo);
+        }
+
+        if (filtros.autor) {
+            params.set("author", filtros.autor);
+        }
+
+        params.set("limit", LIMITE_POR_EXIBICAO);
+        params.set("page", paginaAtual);
+
+        const url = `${URL_API}?${params}`;
 
         const response = await fetch(url);
 
         if (!response.ok) {
-            const erro = await response.text();
-
-            console.error("Resposta da API:", erro);
-
             throw new Error(`Erro HTTP: ${response.status}`);
         }
 
         const data = await response.json();
+
+        data.docs.forEach((livro) => {
+            livros.set(livro.key, livro);
+        });
 
         console.log("Página:", paginaAtual);
         console.log("Total de resultados:", data.numFound);
@@ -114,12 +128,14 @@ async function fazerBuscaSimples(query, novaBusca = false) {
          * Se for uma nova pesquisa,
          * apaga os resultados anteriores.
          */
+
+
         if (novaBusca) {
 
             if (data.numFound === 0) {
 
                 divResultados.innerHTML = `
-            <h2>Nenhum resultado encontrado para "${query}"</h2>
+            <h2>Nenhum resultado encontrado.</h2>
         `;
 
                 divBuscarMais.classList.add("d-none");
@@ -128,7 +144,7 @@ async function fazerBuscaSimples(query, novaBusca = false) {
             }
 
             divResultados.innerHTML = `
-        <h2>${data.numFound} resultados para "${query}"</h2>
+        <h2>${data.numFound} resultados encontrados.</h2>
 
         <div
             id="lista-livros"
@@ -198,7 +214,6 @@ async function fazerBuscaSimples(query, novaBusca = false) {
  * Cria o HTML de um livro.
  */
 function criarCardLivro(livro) {
-
     const autor =
         livro.author_name?.join(", ") ??
         "Autor desconhecido";
@@ -212,7 +227,6 @@ function criarCardLivro(livro) {
 
     return `
         <div class="col">
-
             <div class="card d-flex flex-row">
 
                 ${livro.cover_i != null
@@ -225,19 +239,13 @@ function criarCardLivro(livro) {
                     `
             : `
                         <div class="capa-livro capa-indisponivel">
-
                             <i class="bi bi-book fs-2"></i>
-
-                            <span>
-                                Sem capa
-                            </span>
-
+                            <span>Sem capa</span>
                         </div>
                     `
         }
 
                 <div class="card-body">
-
                     <h5 class="card-title">
                         ${livro.title}
                     </h5>
@@ -250,10 +258,15 @@ function criarCardLivro(livro) {
                         ${ano} - ${edicoes} edições
                     </p>
 
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm btn-detalhes"
+                        data-key="${livro.key}">
+                        Detalhes
+                    </button>
                 </div>
 
             </div>
-
         </div>
     `;
 }
@@ -309,7 +322,7 @@ divBuscarMais.addEventListener("click", async () => {
 
     try {
 
-        await fazerBuscaSimples(buscaAtual);
+        await fazerBuscaLivros(buscaAtual);
 
     } finally {
 
@@ -319,3 +332,84 @@ divBuscarMais.addEventListener("click", async () => {
     }
 
 });
+
+
+document.addEventListener("click", (e) => {
+    const botao = e.target.closest(".btn-detalhes");
+
+    if (!botao) {
+        return;
+    }
+
+    const livro = livros.get(botao.dataset.key);
+
+    if (!livro) {
+        return;
+    }
+
+    abrirModalLivro(livro);
+});
+
+
+function abrirModalLivro(livro) {
+    const titulo = livro.title ?? "Título desconhecido";
+
+    const autores =
+        livro.author_name?.join(", ") ??
+        "Autor desconhecido";
+
+    const ano =
+        livro.first_publish_year ??
+        "Ano desconhecido";
+
+    const edicoes =
+        livro.edition_count ??
+        0;
+
+    const idiomas =
+        livro.language?.join(", ") ??
+        "Não informado";
+
+    const editoras =
+        livro.publisher?.join(", ") ??
+        "Não informadas";
+
+    const assuntos =
+        livro.subject?.slice(0, 10).join(", ") ??
+        "Não informados";
+
+    document.getElementById("modal-livro-titulo").textContent =
+        titulo;
+
+    document.getElementById("modal-livro-conteudo").innerHTML = `
+        <p>
+            <strong>Autor:</strong> ${autores}
+        </p>
+
+        <p>
+            <strong>Primeira publicação:</strong> ${ano}
+        </p>
+
+        <p>
+            <strong>Edições:</strong> ${edicoes}
+        </p>
+
+        <p>
+            <strong>Idiomas:</strong> ${idiomas}
+        </p>
+
+        <p>
+            <strong>Editoras:</strong> ${editoras}
+        </p>
+
+        <p>
+            <strong>Assuntos:</strong> ${assuntos}
+        </p>
+    `;
+
+    const modal = bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("modal-livro")
+    );
+
+    modal.show();
+}
